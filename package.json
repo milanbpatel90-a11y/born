@@ -1,0 +1,20 @@
+{
+  "name": "optical-try-on-v5",
+  "version": "5.0.0",
+  "description": "Professional web-based glasses try-on with ear detection",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mediapipe/face_mesh": "^0.4.1642879847",
+    "@mediapipe/holistic": "^0.5.1646428614",
+    "three": "^0.158.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "terser": "^5.19.0"
+  }
+}
