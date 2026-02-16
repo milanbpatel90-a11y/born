@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optical Try-On | v5.0 with Ear Detection</title>
+  <meta name="description" content="Professional virtual glasses try-on for optical stores">
+  <script type="module" crossorigin src="/assets/index-D_GcyiRi.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/three-C7pa0Fha.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-SNhv7l1z.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Loading State -->
+    <div id="loading-screen" class="full-screen centered">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <p id="loading-message">Loading OpenCV.js & MediaPipe (15-20s)...</p>
+        <div class="progress-bar">
+          <div id="loading-progress" class="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" style="display: none;">
+      <video id="user-video" autoplay playsinline muted></video>
+      <canvas id="tracking-canvas"></canvas>
+      <canvas id="glasses-canvas"></canvas>
+      
+      <!-- UI Overlays -->
+      <div id="calibration-ui" class="bottom-center">
+        <div class="calibration-box">
+          <div class="calibration-icon">🎯</div>
+          <div class="calibration-text">
+            <p>Calibrating camera for precise fitting...</p>
+            <div class="progress-bar small">
+              <div id="cal-progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <p class="calibration-count"><span id="cal-current">0</span>/<span id="cal-total">15</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="confidence-indicator" class="top-right">
+        <div class="confidence-label">Tracking Quality</div>
+        <div class="confidence-bar">
+          <div id="confidence-fill" class="confidence-fill"></div>
+        </div>
+      </div>
+
+      <div id="features-badge" class="top-left">
+        <span class="badge-icon">✨</span>
+        <span id="badge-text">Ear Detection Active</span>
+      </div>
+
+      <div id="instructions" class="bottom-center instructions">
+        <div class="instructions-box">
+          <p><strong>👁️ Look straight at camera</strong></p>
+          <p><strong>👂 Keep ears visible</strong></p>
+          <p><strong>📏 Stay ~50cm from camera</strong></p>
+          <p class="small">Temple angle adapts to your ear position</p>
+        </div>
+      </div>
+
+      <!-- Frame Selector (Optional) -->
+      <div id="frame-selector" class="frame-selector">
+        <!-- Dynamically populated by UIManager -->
+      </div>
+
+      <!-- Feedback Form -->
+      <div id="feedback-modal" class="modal">
+        <div class="modal-content">
+          <h3>How was your virtual try-on?</h3>
+          <div class="rating-buttons">
+            <button class="rating-btn" data-rating="1">⭐</button>
+            <button class="rating-btn" data-rating="2">⭐⭐</button>
+            <button class="rating-btn" data-rating="3">⭐⭐⭐</button>
+            <button class="rating-btn" data-rating="4">⭐⭐⭐⭐</button>
+            <button class="rating-btn" data-rating="5">⭐⭐⭐⭐⭐</button>
+          </div>
+          <textarea id="feedback-comment" placeholder="Any suggestions?"></textarea>
+          <div class="modal-buttons">
+            <button id="submit-feedback" class="btn-primary">Submit</button>
+            <button id="skip-feedback" class="btn-secondary">Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OpenCV.js (must load before app) -->
+  <script async src="./assets/js/opencv.js" 
+          onload="window.opencvReady=true; window.dispatchEvent(new Event('opencvLoaded'))"
+          onerror="console.error('OpenCV.js failed to load')">
+  </script>
+
+  <!-- App Entry Point -->
+</body>
+</html>
