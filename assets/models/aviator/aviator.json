@@ -1,0 +1,56 @@
+{
+  "modelName": "Aviator Classic",
+  "version": "5.0",
+  "calibration": {
+    "sellionY": 2.1,
+    "sellionZ": -1.2,
+    "defaultTempleAngle": 10.0,
+    "templeLength": 150,
+    "bridgeWidth": 20,
+    "lensWidth": 58,
+    "lensHeight": 48,
+    "frameThickness": 3.5,
+    "templeAngleRange": {
+      "min": 5,
+      "max": 20
+    }
+  },
+  "materials": {
+    "frame": {
+      "type": "metal",
+      "color": "#8B4513",
+      "metalness": 0.8,
+      "roughness": 0.1,
+      "clearcoat": 0.9
+    },
+    "lens": {
+      "type": "tinted",
+      "color": "#4169E1",
+      "transmission": 0.7,
+      "opacity": 0.4,
+      "polarized": true
+    },
+    "nosePads": {
+      "type": "silicone",
+      "color": "#2F2F2F"
+    }
+  },
+  "features": [
+    "polarized",
+    "uv-protection",
+    "classic-style",
+    "metal-frame"
+  ],
+  "fitProfile": {
+    "faceShapes": ["oval", "round", "heart"],
+    "size": "medium",
+    "weight": "light"
+  },
+  "metadata": {
+    "brand": "Demo Optics",
+    "collection": "Classic",
+    "year": "2024",
+    "price": "₹3999",
+    "sku": "AV-001"
+  }
+}

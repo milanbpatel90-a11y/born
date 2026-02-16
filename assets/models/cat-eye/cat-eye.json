@@ -1,0 +1,56 @@
+{
+  "modelName": "Cat Eye Fashion",
+  "version": "5.0",
+  "calibration": {
+    "sellionY": 1.6,
+    "sellionZ": -0.8,
+    "defaultTempleAngle": 7.5,
+    "templeLength": 140,
+    "bridgeWidth": 16,
+    "lensWidth": 50,
+    "lensHeight": 45,
+    "frameThickness": 4.0,
+    "templeAngleRange": {
+      "min": 3,
+      "max": 15
+    }
+  },
+  "materials": {
+    "frame": {
+      "type": "acetate",
+      "color": "#000000",
+      "metalness": 0.0,
+      "roughness": 0.3,
+      "clearcoat": 0.7
+    },
+    "lens": {
+      "type": "gradient",
+      "color": "#000000",
+      "transmission": 0.8,
+      "opacity": 0.2,
+      "gradient": true
+    },
+    "nosePads": {
+      "type": "integrated",
+      "color": "#000000"
+    }
+  },
+  "features": [
+    "fashion-forward",
+    "lightweight",
+    "acetate-frame",
+    "gradient-lens"
+  ],
+  "fitProfile": {
+    "faceShapes": ["heart", "oval", "square"],
+    "size": "small-medium",
+    "weight": "ultra-light"
+  },
+  "metadata": {
+    "brand": "Demo Optics",
+    "collection": "Fashion",
+    "year": "2024",
+    "price": "₹3499",
+    "sku": "CE-002"
+  }
+}

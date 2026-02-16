@@ -1,0 +1,47 @@
+{
+  "version": "5.0",
+  "lastUpdated": "2026-02-13T00:00:00Z",
+  "frames": [
+    {
+      "id": "glasses2",
+      "name": "Glasses 2",
+      "price": "INR 3999",
+      "category": "custom",
+      "thumbnail": "./assets/images/placeholder-frame.png",
+      "model": "./assets/models/glasses2/glasses2.glb",
+      "calibration": {
+        "sellionY": 1.8,
+        "sellionZ": -1.0,
+        "defaultTempleAngle": 9.0,
+        "templeLength": 145,
+        "bridgeWidth": 18,
+        "lensWidth": 52,
+        "lensHeight": 42
+      },
+      "features": [
+        "custom-upload",
+        "3d-model"
+      ],
+      "description": "Custom 3D glasses model imported by user"
+    }
+  ],
+  "categories": [
+    {
+      "id": "custom",
+      "name": "Custom",
+      "description": "User uploaded and custom frame models"
+    }
+  ],
+  "features": [
+    {
+      "id": "custom-upload",
+      "name": "Custom Upload",
+      "description": "Imported user-specific 3D model"
+    },
+    {
+      "id": "3d-model",
+      "name": "3D Model",
+      "description": "Full 3D GLB glasses rendering"
+    }
+  ]
+}
