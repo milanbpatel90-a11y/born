@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fixes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>Testing Fixes for Optical Try-On Application</h1>
+    
+    <div id="test-results">
+        <div class="status info">Running tests...</div>
+    </div>
+
+    <script type="module">
+        // Test 1: Check if Analytics is properly imported and working
+        async function testAnalytics() {
+            try {
+                const { analytics } = await import('./src/utils/analytics.js');
+                
+                // Test if analytics object exists
+                if (!analytics) {
+                    throw new Error('Analytics object not found');
+                }
+                
+                // Test if trackEvent method exists
+                if (typeof analytics.trackEvent !== 'function') {
+                    throw new Error('trackEvent method not found');
+                }
+                
+                // Test tracking an event
+                analytics.trackEvent('test_event', { test: true });
+                
+                return { success: true, message: 'Analytics working correctly' };
+            } catch (error) {
+                return { success: false, message: 'Analytics test failed: ' + error.message };
+            }
+        }
+
+        // Test 2: Check if EnhancedTrackingMethods imports are fixed
+        async function testEnhancedTracking() {
+            try {
+                const { EnhancedTrackingMethods } = await import('./src/tracking/EnhancedTrackingMethods.js');
+                
+                if (!EnhancedTrackingMethods) {
+                    throw new Error('EnhancedTrackingMethods not found');
+                }
+                
+                return { success: true, message: 'EnhancedTrackingMethods imports working correctly' };
+            } catch (error) {
+                return { success: false, message: 'EnhancedTrackingMethods test failed: ' + error.message };
+            }
+        }
+
+        // Test 3: Check if ProfessionalFaceTracker can be imported
+        async function testProfessionalFaceTracker() {
+            try {
+                const { ProfessionalFaceTracker } = await import('./src/tracking/ProfessionalFaceTracker.js');
+                
+                if (!ProfessionalFaceTracker) {
+                    throw new Error('ProfessionalFaceTracker not found');
+                }
+                
+                return { success: true, message: 'ProfessionalFaceTracker imports working correctly' };
+            } catch (error) {
+                return { success: false, message: 'ProfessionalFaceTracker test failed: ' + error.message };
+            }
+        }
+
+        // Run all tests
+        async function runTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            const tests = [
+                { name: 'Analytics Module', test: testAnalytics },
+                { name: 'EnhancedTrackingMethods Module', test: testEnhancedTracking },
+                { name: 'ProfessionalFaceTracker Module', test: testProfessionalFaceTracker }
+            ];
+            
+            for (const { name, test } of tests) {
+                const result = await test();
+                const div = document.createElement('div');
+                div.className = result.success ? 'status success' : 'status error';
+                div.textContent = `${name}: ${result.message}`;
+                results.appendChild(div);
+            }
+            
+            // Add final status
+            const finalDiv = document.createElement('div');
+            finalDiv.className = 'status info';
+            finalDiv.innerHTML = `
+                <strong>Test Summary:</strong><br>
+                - Fixed Analytics.trackEvent usage in main.js<br>
+                - Fixed missing imports in EnhancedTrackingMethods.js<br>
+                - Added robust MediaPipe asset loading with fallbacks<br>
+                - Updated vite.config.js for better asset handling<br>
+                <br>
+                <strong>Next Steps:</strong><br>
+                1. Open the application at http://localhost:5174/<br>
+                2. Check browser console for any remaining errors<br>
+                3. Test camera access and face tracking functionality
+            `;
+            results.appendChild(finalDiv);
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

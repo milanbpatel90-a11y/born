@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Glasses Try-On | Professional Virtual Fitting</title>
+  <meta name="description" content="Professional virtual glasses try-on powered by AI face tracking">
+  <link rel="stylesheet" href="./src/ui/styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 16px 0;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    #try-on-container {
+      position: relative;
+      width: 390px;
+      height: 844px;
+      max-height: 100vh;
+      overflow: hidden;
+      background: #000;
+      margin: 0 auto;
+      border-radius: 24px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 420px) {
+      #try-on-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+    #user-video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    #glasses-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      /* No mirroring - glasses rendered in correct orientation */
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    .loading-content {
+      text-align: center;
+      color: #fff;
+    }
+    .loading-content h2 {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 24px;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top: 4px solid #a78bfa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-bar {
+      width: 300px;
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 16px auto;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    #loading-message {
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+    }
+    #features-badge {
+      position: absolute;
+      top: 16px; left: 16px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 10;
+      display: none;
+    }
+    #features-badge.active { display: flex; align-items: center; gap: 6px; }
+    #debug-info {
+      position: absolute;
+      bottom: 16px; left: 16px;
+      background: rgba(0,0,0,0.7);
+      color: #0f0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: monospace;
+      z-index: 10;
+      display: none;
+    }
+    #frame-selector {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+    .frame-btn {
+      width: 60px; height: 60px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      transition: all 0.2s;
+    }
+    .frame-btn:hover, .frame-btn.active {
+      border-color: #a78bfa;
+      box-shadow: 0 0 12px rgba(167,139,250,0.5);
+      transform: scale(1.05);
+    }
+    #error-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #1a1a2e;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="try-on-container">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <h2>🕶️ AI Glasses Try-On</h2>
+        <p id="loading-message">Initializing face tracking...</p>
+        <div class="progress-bar">
+          <div id="loading-progress" class="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen">
+      <div>
+        <h2>⚠️ Initialization Error</h2>
+        <p id="error-message"></p>
+        <button onclick="location.reload()" style="margin-top:20px;padding:10px 24px;border:none;background:#a78bfa;color:#fff;border-radius:8px;cursor:pointer;font-size:16px">Retry</button>
+      </div>
+    </div>
+
+    <!-- Video + Canvas -->
+    <video id="user-video" autoplay playsinline muted></video>
+    <canvas id="glasses-overlay"></canvas>
+
+    <!-- Badge -->
+    <div id="features-badge">
+      <span>✨</span>
+      <span id="badge-text">Face Tracking Active</span>
+    </div>
+
+    <!-- Debug Info -->
+    <div id="debug-info"></div>
+    <!-- Stats Panel -->
+    <div id="stats-panel" style="
+      position: absolute;
+      top: 60px; right: 16px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      padding: 12px;
+      border-radius: 12px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 20;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: none;
+    ">
+      <div style="margin-bottom:4px;color:#a78bfa">📏 Face Metrics</div>
+      <div>Width: <span id="face-width">0</span>px</div>
+      <div>IPD: <span id="face-ipd">0</span>px</div>
+      <div style="margin:8px 0 4px;color:#60a5fa">👓 Glasses Fit</div>
+      <div>Scale: <span id="glasses-scale">1.0</span>x</div>
+      <div>Status: <span id="fit-status" style="color:#4ade80">OPTIMAL</span></div>
+    </div>
+
+  </div>
+
+  <!-- App Entry Point -->
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
