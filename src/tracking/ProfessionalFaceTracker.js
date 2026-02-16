@@ -105,25 +105,21 @@ export class ProfessionalFaceTracker {
 
   async _initMediaPipe() {
     try {
-      const mpFaceMesh = await import('@mediapipe/face_mesh');
+      // Wait for CDN-loaded FaceMesh to be available
+      if (!window.FaceMesh) {
+        await new Promise((resolve, reject) => {
+          if (window._faceMeshReady) { resolve(); return; }
+          const timeout = setTimeout(() => reject(new Error('FaceMesh CDN load timeout')), 30000);
+          window.addEventListener('faceMeshLoaded', () => { clearTimeout(timeout); resolve(); });
+        });
+      }
       
-      // Create a robust locateFile function with fallbacks
-      const locateFile = (file) => {
-        // Try multiple CDN sources
-        const cdnUrls = [
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-          `https://unpkg.com/@mediapipe/face_mesh/${file}`,
-          `https://cdn.skypack.dev/@mediapipe/face_mesh/${file}`
-        ];
-        
-        // Return the first URL - MediaPipe will handle fallbacks internally
-        return cdnUrls[0];
-      };
+      // Initialize FaceMesh from CDN global (no locateFile needed — CDN handles WASM)
+      this.faceMesh = new window.FaceMesh({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+      });
       
-      // Initialize FaceMesh
-      this.faceMesh = new mpFaceMesh.FaceMesh({
-        locateFile: locateFile,
-        modelComplexity: 1, // Use simpler model for better performance
+      this.faceMesh.setOptions({
         maxNumFaces: 1,
         refineLandmarks: true,
         minDetectionConfidence: 0.5,
@@ -131,7 +127,7 @@ export class ProfessionalFaceTracker {
       });
       
       this.faceMesh.onResults(this._onFaceMeshResults.bind(this));
-      console.log('[TRACKER] FaceMesh initialized');
+      console.log('[TRACKER] FaceMesh initialized from CDN');
     } catch (error) {
       console.error('[TRACKER] Failed to initialize FaceMesh:', error);
       throw error;
@@ -140,25 +136,22 @@ export class ProfessionalFaceTracker {
 
   async _initHolistic() {
     try {
-      const mpHolistic = await import('@mediapipe/holistic');
+      // Wait for CDN-loaded Holistic to be available
+      if (!window.Holistic) {
+        await new Promise((resolve, reject) => {
+          if (window._holisticReady) { resolve(); return; }
+          const timeout = setTimeout(() => reject(new Error('Holistic CDN load timeout')), 30000);
+          window.addEventListener('holisticLoaded', () => { clearTimeout(timeout); resolve(); });
+        });
+      }
       
-      // Create a robust locateFile function with fallbacks
-      const locateFile = (file) => {
-        // Try multiple CDN sources
-        const cdnUrls = [
-          `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`,
-          `https://unpkg.com/@mediapipe/holistic/${file}`,
-          `https://cdn.skypack.dev/@mediapipe/holistic/${file}`
-        ];
-        
-        // Return the first URL - MediaPipe will handle fallbacks internally
-        return cdnUrls[0];
-      };
+      // Initialize Holistic from CDN global
+      this.holistic = new window.Holistic({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
+      });
       
-      // Initialize Holistic
-      this.holistic = new mpHolistic.Holistic({
-        locateFile: locateFile,
-        modelComplexity: 0, // Use simplest model for better performance
+      this.holistic.setOptions({
+        modelComplexity: 0,
         smoothLandmarks: true,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.8,
@@ -167,7 +160,7 @@ export class ProfessionalFaceTracker {
       
       this.holistic.onResults(this._onHolisticResults.bind(this));
       this.hasHolistic = true;
-      console.log('[TRACKER] Holistic initialized (ear detection enabled)');
+      console.log('[TRACKER] Holistic initialized from CDN (ear detection enabled)');
     } catch (error) {
       console.warn('[TRACKER] Holistic not available:', error.message);
       this.hasHolistic = false;
@@ -207,7 +200,6 @@ export class ProfessionalFaceTracker {
 
   async processFrame(timestamp) {
     if (this.video.readyState < 2) return null;
-    if (!window.opencvReady || typeof cv === 'undefined') return null;
     if (!this.isInitialized) {
       if (this.initializationPromise) {
         await this.initializationPromise;

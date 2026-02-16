@@ -29,10 +29,17 @@ const loadingProgress = document.getElementById('loading-progress');
 // Initialize application
 async function initApplication() {
   try {
-    // Step 1: Wait for OpenCV.js
-    updateLoadingProgress(10, 'Loading OpenCV.js...');
-    await waitForOpenCV();
-    updateLoadingProgress(30, 'OpenCV loaded. Initializing trackers...');
+    // Step 1: Wait for MediaPipe FaceMesh from CDN
+    updateLoadingProgress(10, 'Loading MediaPipe FaceMesh...');
+    await waitForFaceMesh();
+    updateLoadingProgress(30, 'FaceMesh loaded. Requesting camera...');
+    
+    // Load OpenCV in background (optional, enhances pose estimation)
+    waitForOpenCV().then(() => {
+      console.log('[MAIN] OpenCV loaded (enhanced pose estimation available)');
+    }).catch(() => {
+      console.warn('[MAIN] OpenCV not available, using JS fallback pose estimation');
+    });
     
     // Step 2: Setup camera
     updateLoadingProgress(40, 'Requesting camera access...');
@@ -113,6 +120,37 @@ async function initApplication() {
     console.error('[MAIN] Initialization failed:', error);
     showErrorScreen(error.message || 'Failed to initialize application');
   }
+}
+
+// Wait for MediaPipe FaceMesh CDN to load
+function waitForFaceMesh() {
+  return new Promise((resolve, reject) => {
+    if (window._faceMeshReady && window.FaceMesh) {
+      console.log('[INIT] FaceMesh already loaded from CDN');
+      resolve();
+      return;
+    }
+    
+    const timeout = setTimeout(() => {
+      reject(new Error('FaceMesh CDN failed to load within 30 seconds'));
+    }, 30000);
+    
+    window.addEventListener('faceMeshLoaded', () => {
+      clearTimeout(timeout);
+      console.log('[INIT] FaceMesh loaded from CDN');
+      resolve();
+    });
+    
+    // Fallback check
+    const checkInterval = setInterval(() => {
+      if (window._faceMeshReady && window.FaceMesh) {
+        clearTimeout(timeout);
+        clearInterval(checkInterval);
+        console.log('[INIT] FaceMesh detected from CDN');
+        resolve();
+      }
+    }, 100);
+  });
 }
 
 // Wait for OpenCV.js to load
